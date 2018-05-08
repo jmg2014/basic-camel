@@ -1,0 +1,74 @@
+spring:
+  profiles:
+    active: dev
+camel:
+  springboot:
+    shutdownTimeout: 2
+    health.indicator.enabled: true
+
+management:
+  security:
+    enabled: false
+
+---
+
+spring:
+  profiles: mock
+  mail:
+      host: smtp.gmail.com
+      port: 587
+      username: email@gmail.com
+      password:
+      properties.mail.smtp.auth:  true
+      properties.mail.smtp.starttls.enable: true
+
+mailto: email@gmail.com
+mailFrom: email@gmail.com
+
+startRoute: direct:input
+fromRoute : file:data/input?delete=true&readLock=none
+toRoute1: mock:output
+toRoute2: mock:output1
+toRoute3: mock:output2
+healthRoute: direct:health
+
+message: DEV Environment
+
+
+
+
+---
+
+spring:
+  profiles: dev
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url:  jdbc:postgresql://localhost:5432/localDB
+    username: postgres
+    password: postgres
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: email@gmail.com
+    password: xxxxxxx
+    properties:
+      mail:
+        smtp: 
+          auth:  true
+        starttls:
+          enable: true  
+        required: true          
+
+mailto: email@gmail.com
+mailFrom: email@gmail.com
+
+
+startRoute: timer:hello?period=10s
+fromRoute : file:data/input?delete=true&readLock=none&moveFailed=error
+toRoute1: file:data/output
+toRoute2: jdbc:dataSource
+toRoute3: file:data/output?fileName=Success.txt
+healthRoute: timer:healthRoute?period=10s
+
+message: DEV Environment
+
